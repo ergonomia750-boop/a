@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#7c3aed">
+<title>Escola do Futuro — O Desafio da Transformação</title>
+<style>
+  :root{
+    --azul:#2563eb;
+    --azul-esc:#1e40af;
+    --roxo:#7c3aed;
+    --roxo-esc:#5b21b6;
+    --branco:#ffffff;
+    --amarelo:#facc15;
+    --amarelo-esc:#eab308;
+    --cinza:#f1f5f9;
+    --texto:#0f172a;
+    --sombra:0 10px 30px rgba(30,64,175,.15);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:linear-gradient(135deg,#e0e7ff 0%,#f5f3ff 50%,#fef9c3 100%);
+    color:var(--texto);
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:12px;overflow-x:hidden;
+  }
+  .app{
+    width:100%;max-width:1000px;
+    background:rgba(255,255,255,.85);
+    backdrop-filter:blur(14px);
+    border-radius:24px;
+    box-shadow:var(--sombra);
+    padding:20px;
+    position:relative;
+    min-height:calc(100vh - 24px);
+    display:flex;flex-direction:column;
+  }
+  h1,h2,h3{color:var(--azul-esc);}
+  h1{font-size:clamp(1.3rem,4vw,2rem);line-height:1.2;}
+  h2{font-size:clamp(1.1rem,3vw,1.5rem);margin-bottom:6px;}
+  p{line-height:1.55;color:#334155;}
+  .hidden{display:none !important;}
+
+  /* HEADER */
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    gap:10px;flex-wrap:wrap;margin-bottom:14px;
+  }
+  .badge{
+    background:linear-gradient(135deg,var(--roxo),var(--azul));
+    color:#fff;padding:6px 14px;border-radius:20px;font-weight:700;font-size:.85rem;
+    box-shadow:0 4px 12px rgba(124,58,237,.35);
+  }
+  .score-box{
+    background:var(--amarelo);color:#713f12;padding:6px 14px;border-radius:20px;
+    font-weight:800;font-size:.85rem;box-shadow:0 4px 12px rgba(250,204,21,.5);
+    transition:transform .3s;
+  }
+  .score-box.pulse{transform:scale(1.15);}
+
+  /* PROGRESS */
+  .progress-wrap{
+    width:100%;height:14px;background:#e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:18px;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.08);
+  }
+  .progress-bar{
+    height:100%;width:0%;
+    background:linear-gradient(90deg,var(--azul),var(--roxo),var(--amarelo));
+    background-size:200% 100%;
+    border-radius:10px;transition:width .6s ease;
+    animation:flow 3s linear infinite;
+  }
+  @keyframes flow{0%{background-position:0% 0}100%{background-position:200% 0}}
+
+  /* BOTÕES */
+  button{
+    font-family:inherit;cursor:pointer;border:none;border-radius:14px;
+    font-weight:700;font-size:1rem;padding:14px 26px;
+    transition:transform .15s, box-shadow .2s, filter .2s;
+  }
+  button:active{transform:scale(.97);}
+  .btn-primary{
+    background:linear-gradient(135deg,var(--azul),var(--roxo));color:#fff;
+    box-shadow:0 8px 20px rgba(37,99,235,.35);
+  }
+  .btn-primary:hover{filter:brightness(1.1);box-shadow:0 10px 26px rgba(124,58,237,.45);}
+  .btn-yellow{
+    background:linear-gradient(135deg,var(--amarelo),#f59e0b);color:#713f12;
+    box-shadow:0 8px 20px rgba(250,204,21,.45);
+  }
+  .btn-ghost{
+    background:#fff;color:var(--azul-esc);border:2px solid #c7d2fe;font-size:.9rem;padding:10px 18px;
+  }
+  .btn-ghost:hover{background:#eef2ff;}
+  .btn-restart{
+    background:#fff;color:#b91c1c;border:2px solid #fecaca;font-size:.85rem;padding:8px 16px;
+    position:absolute;top:16px;right:16px;z-index:10;
+  }
+  .btn-restart:hover{background:#fef2f2;}
+
+  /* TELAS */
+  .screen{animation:fadeIn .5s ease;flex:1;display:flex;flex-direction:column;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+  /* TELA INICIAL */
+  .hero{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;gap:18px;padding:20px 10px;
+  }
+  .hero-icon{font-size:clamp(4rem,14vw,7rem);animation:float 3s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  .hero p{max-width:520px;font-size:1.05rem;}
+  .hero .tag{
+    background:#eef2ff;color:var(--roxo-esc);padding:8px 18px;border-radius:20px;
+    font-weight:600;font-size:.85rem;
+  }
+
+  /* FASE 1 — DRAG DROP */
+  .fase-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1;}
+  @media(max-width:700px){.fase-grid{grid-template-columns:1fr;}}
+  .panel{
+    background:#fff;border-radius:18px;padding:14px;box-shadow:0 4px 16px rgba(30,64,175,.08);
+    border:2px dashed #c7d2fe;min-height:120px;
+  }
+  .panel h3{font-size:.95rem;margin-bottom:10px;color:var(--roxo-esc);}
+  .zone{
+    background:linear-gradient(135deg,#f8fafc,#eef2ff);
+    border:2px dashed #a5b4fc;border-radius:14px;
+    padding:10px;min-height:70px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;
+    transition:background .2s,border-color .2s;
+  }
+  .zone.over{background:#ddd6fe;border-color:var(--roxo);}
+  .zone-label{font-size:.78rem;font-weight:700;color:#64748b;margin:10px 0 4px;text-transform:uppercase;letter-spacing:.5px;}
+  .item{
+    display:flex;align-items:center;gap:6px;
+    background:linear-gradient(135deg,#fff,#f1f5f9);
+    border:2px solid #e2e8f0;border-radius:12px;
+    padding:8px 12px;font-size:.85rem;font-weight:600;cursor:grab;
+    box-shadow:0 3px 8px rgba(0,0,0,.06);
+    transition:transform .15s, box-shadow .15s, border-color .15s;
+    user-select:none;touch-action:none;color:var(--azul-esc);
+  }
+  .item:hover{border-color:var(--roxo);transform:translateY(-2px);box-shadow:0 6px 14px rgba(124,58,237,.2);}
+  .item.dragging{opacity:.4;cursor:grabbing;}
+  .item .emoji{font-size:1.2rem;}
+  .item.placed{background:linear-gradient(135deg,#dcfce7,#bbf7d0);border-color:#22c55e;color:#166534;}
+  .pool{display:flex;flex-wrap:wrap;gap:8px;min-height:80px;padding:10px;background:#fef9c3;border-radius:14px;border:2px dashed #fde047;}
+
+  /* FASE 2 — TIMELINE */
+  .timeline{
+    display:flex;flex-direction:column;gap:10px;margin-top:10px;
+  }
+  .slot{
+    display:flex;align-items:center;gap:10px;
+    background:#fff;border:2px dashed #c7d2fe;border-radius:14px;padding:10px;min-height:62px;
+    transition:background .2s,border-color .2s;
+  }
+  .slot.over{background:#ede9fe;border-color:var(--roxo);}
+  .slot-num{
+    width:34px;height:34px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg,var(--azul),var(--roxo));color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;
+  }
+  .slot-drop{flex:1;display:flex;flex-wrap:wrap;gap:8px;min-height:40px;align-items:center;}
+  .slot-drop .placeholder{color:#94a3b8;font-size:.85rem;font-style:italic;}
+  .timeline .item.tl{width:auto;}
+
+  /* FASE 3/4 - TEXTAREA */
+  textarea{
+    width:100%;min-height:140px;resize:vertical;
+    border:2px solid #c7d2fe;border-radius:14px;padding:14px;
+    font-family:inherit;font-size:1rem;color:var(--texto);
+    background:#fff;transition:border-color .2s, box-shadow .2s;
+  }
+  textarea:focus{outline:none;border-color:var(--roxo);box-shadow:0 0 0 4px rgba(124,58,237,.15);}
+
+  /* FASE 4 — REDE */
+  .net{
+    position:relative;background:radial-gradient(circle at center,#eef2ff,#e0e7ff);
+    border-radius:18px;min-height:340px;padding:16px;margin-top:10px;
+    display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;
+  }
+  .node{
+    background:#fff;border:2px solid #c7d2fe;border-radius:16px;padding:10px 14px;
+    font-size:.85rem;font-weight:700;color:var(--azul-esc);cursor:pointer;
+    box-shadow:0 4px 10px rgba(30,64,175,.1);transition:all .25s;
+    display:flex;flex-direction:column;align-items:center;gap:4px;min-width:90px;
+  }
+  .node .emoji{font-size:1.8rem;}
+  .node.selected{border-color:var(--amarelo);background:#fef9c3;transform:scale(1.06);box-shadow:0 8px 20px rgba(250,204,21,.5);}
+  .node.connected{border-color:#22c55e;background:#f0fdf4;}
+  .net-lines{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+  .net .node{z-index:2;}
+  .conn-count{font-size:.75rem;color:#64748b;margin-top:8px;text-align:center;}
+
+  /* FEEDBACK */
+  .feedback{
+    background:linear-gradient(135deg,#eff6ff,#f5f3ff);
+    border-left:5px solid var(--roxo);border-radius:14px;padding:16px;margin-top:14px;
+    animation:fadeIn .4s;font-size:.95rem;
+  }
+  .feedback strong{color:var(--roxo-esc);}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;justify-content:flex-end;}
+
+  /* FINAL */
+  .final-hero{
+    text-align:center;padding:20px;
+    background:linear-gradient(135deg,#eef2ff,#fef9c3);border-radius:20px;margin-bottom:16px;
+  }
+  .final-hero .big{font-size:clamp(2.5rem,10vw,4rem);}
+  .results{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0;}
+  .result-card{
+    background:#fff;border-radius:16px;padding:16px;text-align:center;
+    box-shadow:0 6px 18px rgba(30,64,175,.1);border-top:4px solid var(--roxo);
+  }
+  .result-card .num{font-size:2rem;font-weight:900;color:var(--azul);}
+  .result-card .lbl{font-size:.8rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+  .ideas-list{display:flex;flex-direction:column;gap:10px;margin:12px 0;}
+  .idea{
+    background:#fff;border-radius:12px;padding:12px 16px;border-left:4px solid var(--amarelo);
+    font-size:.9rem;color:#334155;
+  }
+  .idea .tag{font-size:.7rem;color:var(--roxo-esc);font-weight:800;text-transform:uppercase;letter-spacing:.5px;}
+  .final-quote{
+    text-align:center;font-style:italic;font-size:1.05rem;color:var(--roxo-esc);
+    padding:20px;background:linear-gradient(135deg,#f5f3ff,#eef2ff);border-radius:16px;margin-top:16px;
+    font-weight:600;line-height:1.5;
+  }
+
+  .fade-in{animation:fadeIn .5s ease;}
+  .mission-tag{font-size:.8rem;color:var(--roxo-esc);font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+  .muted{color:#64748b;font-size:.9rem;}
+
+  /* MELHORIAS */
+  body{min-height:100dvh;}
+  .app{min-height:calc(100dvh - 24px);}
+  .hud-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .btn-restart{position:static;}
+  button:focus-visible,.item:focus-visible,.zone:focus-visible,.slot:focus-visible,.pool:focus-visible,.node:focus-visible,textarea:focus-visible{outline:3px solid var(--roxo);outline-offset:2px;}
+  .item.placed{cursor:default;}
+  .item.picked{border-color:var(--amarelo-esc);background:#fef9c3;transform:scale(1.05);box-shadow:0 8px 18px rgba(250,204,21,.5);}
+  .item.ghost{position:fixed;z-index:999;pointer-events:none;margin:0;transform:translate(-50%,-50%) scale(1.08);opacity:.92;box-shadow:0 12px 28px rgba(124,58,237,.35);}
+  body.picking .zone,body.picking .slot,body.picking .pool{cursor:pointer;border-color:var(--roxo);}
+  .shake{animation:shake .35s;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .confetti{position:fixed;top:-20px;z-index:1000;pointer-events:none;animation:fall linear forwards;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:.9}}
+  @media(prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;}}
+
+  /* ===== VISUAL: conforto, cores e responsividade ===== */
+  :root{color-scheme:light;--borda:#e0e7ff;--sombra-sm:0 2px 10px rgba(30,64,175,.08);}
+  html{-webkit-text-size-adjust:100%;}
+  @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth;}}
+  ::selection{background:#ddd6fe;}
+  body{
+    background:
+      radial-gradient(circle at 12% 8%,rgba(124,58,237,.14),transparent 40%),
+      radial-gradient(circle at 90% 92%,rgba(250,204,21,.22),transparent 42%),
+      linear-gradient(160deg,#eef2ff 0%,#f5f3ff 55%,#fffbeb 100%);
+    background-attachment:fixed;
+  }
+  .app{background:rgba(255,255,255,.93);border:1px solid rgba(255,255,255,.9);}
+  p{max-width:68ch;}
+  .final-hero p{margin-inline:auto;}
+  .mission-tag{display:inline-block;align-self:flex-start;background:#eef2ff;padding:4px 12px;border-radius:20px;margin-bottom:10px;}
+  .feedback{box-shadow:var(--sombra-sm);}
+  textarea{min-height:150px;line-height:1.5;}
+
+  /* painéis: borda sólida; tracejado só nos locais de soltar */
+  .panel{border:1.5px solid var(--borda);box-shadow:var(--sombra-sm);}
+  .pool{background:#fffbeb;border:2px dashed #fcd34d;min-height:90px;align-content:flex-start;}
+  .pool.over{background:#fef3c7;border-color:var(--amarelo-esc);}
+  .zone[data-zone="grupo"]{background:#eff6ff;border-color:#93c5fd;}
+  .zone[data-zone="tec"]{background:#f5f3ff;border-color:#c4b5fd;}
+  .zone[data-zone="leitura"]{background:#f0fdf4;border-color:#86efac;}
+  .zone[data-zone="criativa"]{background:#fffbeb;border-color:#fcd34d;}
+  .zone.over{background:#ddd6fe !important;border-color:var(--roxo) !important;}
+  .slot{box-shadow:var(--sombra-sm);}
+  .slot-drop .placeholder{color:#64748b;}
+
+  /* itens e botões confortáveis ao toque */
+  .item{min-height:44px;font-size:.9rem;}
+  @media (hover:none){.item:not(.placed):not(.picked):hover{transform:none;border-color:#e2e8f0;box-shadow:0 3px 8px rgba(0,0,0,.06);}}
+  .item.picked,.item.picked:hover{border-color:var(--amarelo-esc);background:#fef9c3;transform:scale(1.05);box-shadow:0 8px 18px rgba(250,204,21,.5);}
+  button{min-height:46px;}
+  .btn-restart,.btn-ghost{min-height:40px;}
+
+  /* rede: participantes em círculo, linhas não passam por trás de outros */
+  .net{display:block;height:380px;padding:0;max-width:640px;margin:10px auto 0;}
+  .net .node{position:absolute;width:104px;padding:12px 8px;transform:translate(-50%,-50%);}
+  .net .node:nth-of-type(1){left:50%;top:16%;}
+  .net .node:nth-of-type(2){left:84%;top:36%;}
+  .net .node:nth-of-type(3){left:84%;top:70%;}
+  .net .node:nth-of-type(4){left:50%;top:88%;}
+  .net .node:nth-of-type(5){left:16%;top:70%;}
+  .net .node:nth-of-type(6){left:16%;top:36%;}
+  .net .node.selected{transform:translate(-50%,-50%) scale(1.08);}
+  .results{grid-template-columns:repeat(3,1fr);gap:10px;}
+
+  /* CELULAR */
+  @media (max-width:600px){
+    body{padding:8px;}
+    .app{padding:16px 14px;border-radius:20px;min-height:calc(100dvh - 16px);}
+    .actions{flex-direction:column;}
+    .actions button{width:100%;}
+    .net{height:360px;}
+    .net .node{width:96px;font-size:.78rem;}
+    .results{gap:8px;}
+    .result-card{padding:12px 6px;}
+    .result-card .num{font-size:1.5rem;}
+    .result-card .lbl{font-size:.68rem;letter-spacing:.2px;}
+    .final-hero{padding:16px;}
+    .zone{min-height:60px;}
+  }
+  /* COMPUTADOR */
+  @media (min-width:900px){
+    html{font-size:17px;}
+    body{padding:32px 24px;justify-content:center;}
+    .app{min-height:0;padding:36px 44px;}
+    .fase-grid{gap:24px;align-items:start;}
+    .fase-grid>.panel:first-child{position:sticky;top:16px;}
+    .zone{min-height:78px;}
+  }
+
+  /* ===== ACABAMENTO FINAL ===== */
+  .screen{width:100%;max-width:880px;margin-inline:auto;}
+  .screen h2{font-size:clamp(1.35rem,3.4vw,1.8rem);line-height:1.2;margin-bottom:6px;}
+  .screen>p{color:#475569;margin-bottom:16px;}
+  .panel h3{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--roxo);}
+  .actions{margin-top:18px;}
+  .conn-count{margin-top:12px;}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="topbar hidden" id="topbar">
+    <span class="badge" id="missionBadge" aria-live="polite">Missão 1 de 3</span>
+    <div class="hud-right">
+      <span class="score-box" id="scoreBox" aria-live="polite">⭐ 0 pts</span>
+      <button class="btn-restart hidden" id="btnRestart" onclick="restartGame()">↻ Reiniciar</button>
+    </div>
+  </div>
+  <div class="progress-wrap hidden" id="progressWrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <div id="screens"></div>
+</div>
+
+<script>
+/* ============================================================
+   ESTADO GLOBAL
+============================================================ */
+const state = {
+  score: 0,
+  phase: 0, // 0=inicio, 1..4, 5=final
+  phase1Done:false,
+  phase2Done:false,
+  
+  phase4Idea:'',
+  connections:0,
+  phaseScores:{1:0,2:0,3:0,4:0}
+};
+
+const screensEl = document.getElementById('screens');
+const topbar = document.getElementById('topbar');
+const progressWrap = document.getElementById('progressWrap');
+const progressBar = document.getElementById('progressBar');
+const scoreBox = document.getElementById('scoreBox');
+const missionBadge = document.getElementById('missionBadge');
+const btnRestart = document.getElementById('btnRestart');
+
+function updateHUD(){
+  scoreBox.textContent = '⭐ ' + state.score + ' pts';
+  // progresso baseado em missões concluídas
+  const done = [state.phase1Done,state.phase2Done,!!state.phase4Idea].filter(Boolean).length;
+  progressBar.style.width = (done/3*100) + '%';
+  if(state.phase>=1 && state.phase<=3){
+    missionBadge.textContent = 'Missão ' + state.phase + ' de 3';
+  } else if(state.phase===4){
+    missionBadge.textContent = '🏆 Concluído';
+  }
+}
+
+function addScore(pts, label){
+  state.score += pts;
+  updateHUD();
+  scoreBox.classList.add('pulse');
+  setTimeout(()=>scoreBox.classList.remove('pulse'),350);
+}
+
+function showHUD(show){
+  topbar.classList.toggle('hidden',!show);
+  progressWrap.classList.toggle('hidden',!show);
+  btnRestart.classList.toggle('hidden',!show);
+}
+
+function clearScreen(){ screensEl.innerHTML=''; }
+
+/* ============================================================
+   TELA INICIAL
+============================================================ */
+function renderStart(){
+  state.phase = 0;
+  showHUD(false);
+  clearScreen();
+  const div = document.createElement('div');
+  div.className='screen';
+  div.innerHTML = `
+    <div class="hero">
+      <div class="hero-icon">🏫✨</div>
+      <span class="tag">SÍNTESE 2026 · Projeto Escolar</span>
+      <h1>ESCOLA DO FUTURO<br><span style="color:var(--roxo)">O Desafio da Transformação</span></h1>
+      <p>Assuma o papel de <strong>agente de transformação</strong> e use inovação, criatividade e tecnologia consciente para tornar a escola um lugar mais participativo, colaborativo e engajador.</p>
+      <p class="muted">3 missões interativas · arraste, organize, conecte e crie.</p>
+      <button class="btn-primary" style="font-size:1.15rem;padding:16px 40px" onclick="startGame()">🚀 Começar Missão</button>
+    </div>`;
+  screensEl.appendChild(div);
+}
+
+function startGame(){
+  state.phase = 1;
+  showHUD(true);
+  updateHUD();
+  renderPhase1();
+}
+
+/* ============================================================
+   FASE 1 — RECONSTRUINDO A SALA DE AULA (drag & drop)
+============================================================ */
+const phase1Items = [
+  {id:'p1', emoji:'🪑', label:'Mesas em grupo', zone:'grupo'},
+  {id:'p2', emoji:'💻', label:'Notebooks', zone:'tec'},
+  {id:'p3', emoji:'📚', label:'Estante de livros', zone:'leitura'},
+  {id:'p4', emoji:'🎨', label:'Materiais de arte', zone:'criativa'},
+  {id:'p5', emoji:'📽️', label:'Projetor', zone:'tec'},
+  {id:'p6', emoji:'🛋️', label:'Cantinho de leitura', zone:'leitura'},
+  {id:'p7', emoji:'🧩', label:'Jogos educativos', zone:'grupo'},
+  {id:'p8', emoji:'✏️', label:'Materiais criativos', zone:'criativa'},
+];
+
+function renderPhase1(){
+  clearScreen();
+  const div = document.createElement('div');
+  div.className='screen';
+  div.innerHTML = `
+    <div class="mission-tag">Missão 1 · Reconstruindo a Sala de Aula</div>
+    <h2>Organize o ambiente escolar</h2>
+    <p>A sala está desorganizada! <strong>Arraste</strong> cada elemento para a área correta. Um ambiente bem pensado aumenta o engajamento e a participação.</p>
+    <div class="fase-grid" style="margin-top:14px">
+      <div class="panel">
+        <h3>🎯 Elementos para posicionar</h3>
+        <div class="pool" id="pool"></div>
+        <p class="muted" style="margin-top:8px;font-size:.8rem">Arraste para as áreas ao lado →</p>
+      </div>
+      <div class="panel" id="zonesPanel">
+        <h3>🏫 Áreas da sala</h3>
+        <div class="zone-label">👥 Trabalho em grupo</div>
+        <div class="zone" data-zone="grupo"></div>
+        <div class="zone-label">💻 Recursos tecnológicos</div>
+        <div class="zone" data-zone="tec"></div>
+        <div class="zone-label">📖 Espaço de leitura</div>
+        <div class="zone" data-zone="leitura"></div>
+        <div class="zone-label">🎨 Atividades criativas</div>
+        <div class="zone" data-zone="criativa"></div>
+      </div>
+    </div>
+    <div class="feedback hidden" id="fb1" aria-live="polite"></div>
+    <div class="actions">
+      <button class="btn-primary hidden" id="next1" onclick="finishPhase1()">Avançar para Missão 2 →</button>
+    </div>`;
+  screensEl.appendChild(div);
+
+  const pool = div.querySelector('#pool');
+  phase1Items.forEach(it=>{
+    const el = makeItem(it, 'p1');
+    pool.appendChild(el);
+  });
+
+  // zones
+  div.querySelectorAll('.zone').forEach(zone=>{
+    setupDropZone(zone, itemEl=>handleZoneDrop(zone, itemEl));
+  });
+
+  setupPoolDrops(pool);
+}
+
+function makeItem(it, phase){
+  const el = document.createElement('div');
+  el.className='item';
+  el.draggable = true;
+  el.dataset.zone = it.zone;
+  el.dataset.id = it.id;
+  el.innerHTML = `<span class="emoji">${it.emoji}</span><span>${it.label}</span>`;
+  setupDrag(el);
+  return el;
+}
+
+/* Drag & Drop unificado (mouse + touch via HTML5 drag + fallback touch) */
+let picked = null;
+function pick(el){
+  if(picked) picked.classList.remove('picked');
+  picked = el;
+  if(el){
+    el.classList.add('picked'); document.body.classList.add('picking');
+    document.querySelectorAll('.zone,.slot,.pool').forEach(z=>z.tabIndex=0);
+  } else document.body.classList.remove('picking');
+}
+function dropOn(drop, el){
+  if(drop.classList.contains('zone')) handleZoneDrop(drop, el);
+  else if(drop.classList.contains('slot')) handleSlotDrop(drop, el);
+  else if(drop.classList.contains('pool')){ el.classList.remove('placed'); drop.appendChild(el); fixSlots(); }
+}
+function fixSlots(){
+  document.querySelectorAll('#timeline .slot-drop').forEach(d=>{
+    const has = d.querySelector('.item'), ph = d.querySelector('.placeholder');
+    if(!has && !ph) d.innerHTML = '<span class="placeholder">Arraste uma atividade aqui…</span>';
+    if(has && ph) ph.remove();
+  });
+}
+function setupDrag(el){
+  el.tabIndex = 0; el.setAttribute('role','button');
+  el.addEventListener('dragstart', e=>{
+    e.dataTransfer.setData('text/plain', el.dataset.id);
+    el.classList.add('dragging');
+  });
+  el.addEventListener('dragend', ()=>{ el.classList.remove('dragging'); fixSlots(); });
+
+  // clique / teclado: seleciona o item e depois a área de destino
+  el.addEventListener('click', ()=>{
+    if(el._jd || el.classList.contains('placed')) return;
+    pick(picked===el ? null : el);
+  });
+  el.addEventListener('keydown', e=>{
+    if(e.key==='Enter' || e.key===' '){ e.preventDefault(); el.click(); }
+  });
+
+  // toque: arrastar com um "fantasma" sob o dedo
+  let ghost=null, moved=false;
+  const endGhost=()=>{ if(ghost){ ghost.remove(); ghost=null; } };
+  el.addEventListener('touchstart', ()=>{ moved=false; }, {passive:true});
+  el.addEventListener('touchmove', e=>{
+    if(el.classList.contains('placed')) return;
+    const t = e.touches[0];
+    if(!moved){
+      moved = true; el.classList.add('dragging');
+      ghost = el.cloneNode(true);
+      ghost.classList.remove('dragging'); ghost.classList.add('ghost');
+      ghost.removeAttribute('data-id'); ghost.removeAttribute('tabindex');
+      document.body.appendChild(ghost);
+    }
+    ghost.style.left = t.clientX+'px'; ghost.style.top = t.clientY+'px';
+    document.querySelectorAll('.zone.over,.slot.over,.pool.over').forEach(z=>z.classList.remove('over'));
+    const target = document.elementFromPoint(t.clientX, t.clientY);
+    const drop = target && target.closest('.zone, .slot, .pool');
+    if(drop) drop.classList.add('over');
+    e.preventDefault();
+  }, {passive:false});
+  el.addEventListener('touchend', e=>{
+    if(!moved) return;
+    const t = e.changedTouches[0];
+    endGhost();
+    const target = document.elementFromPoint(t.clientX, t.clientY);
+    const drop = target && target.closest('.zone, .slot, .pool');
+    if(drop) dropOn(drop, el);
+    el.classList.remove('dragging');
+    document.querySelectorAll('.over').forEach(z=>z.classList.remove('over'));
+    fixSlots(); moved=false;
+    el._jd = true; setTimeout(()=>el._jd=false, 400);
+  });
+  el.addEventListener('touchcancel', ()=>{ endGhost(); el.classList.remove('dragging'); moved=false; });
+}
+screensEl.addEventListener('click', e=>{
+  if(!picked) return;
+  const drop = e.target.closest('.zone, .slot, .pool');
+  if(!drop || e.target.closest('.item')===picked) return;
+  const el = picked; pick(null); dropOn(drop, el);
+});
+screensEl.addEventListener('keydown', e=>{
+  if((e.key==='Enter'||e.key===' ') && picked && e.target.matches('.zone,.slot,.pool')){ e.preventDefault(); e.target.click(); }
+});
+
+function celebrate(n=18){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const set = ['🎉','⭐','✨','💜','💙','🌟'];
+  for(let i=0;i<n;i++){
+    const c = document.createElement('span');
+    c.className='confetti'; c.textContent=set[i%set.length];
+    c.style.left = Math.random()*100+'vw';
+    c.style.fontSize = (14+Math.random()*14)+'px';
+    c.style.animationDuration = (1.6+Math.random()*1.4)+'s';
+    c.style.animationDelay = (Math.random()*.4)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3600);
+  }
+}
+function reveal(id){
+  const b = document.getElementById(id);
+  b.classList.remove('hidden');
+  b.scrollIntoView({behavior:'smooth',block:'nearest'});
+  celebrate();
+}
+
+function setupDropZone(zone, onDrop){
+  zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('over'); });
+  zone.addEventListener('dragleave', ()=> zone.classList.remove('over'));
+  zone.addEventListener('drop', e=>{
+    e.preventDefault(); zone.classList.remove('over');
+    const id = e.dataTransfer.getData('text/plain');
+    const el = document.querySelector(`.item[data-id="${id}"]`);
+    if(el) onDrop(el);
+  });
+  // touch handled in setupDrag
+}
+function setupPoolDrops(pool){
+  pool.addEventListener('dragover', e=>{ e.preventDefault(); pool.classList.add('over'); });
+  pool.addEventListener('dragleave', ()=> pool.classList.remove('over'));
+  pool.addEventListener('drop', e=>{
+    e.preventDefault(); pool.classList.remove('over');
+    const id = e.dataTransfer.getData('text/plain');
+    const el = document.querySelector(`.item[data-id="${id}"]`);
+    if(el) dropOn(pool, el);
+  });
+}
+function handleZoneDrop(zone, el){
+  if(el.dataset.zone === zone.dataset.zone){
+    el.classList.add('placed'); el.classList.remove('picked'); el.draggable=false; el.tabIndex=-1;
+    zone.appendChild(el);
+    checkPhase1();
+  } else {
+    zone.style.borderColor='#ef4444';
+    zone.classList.remove('shake'); void zone.offsetWidth; zone.classList.add('shake');
+    setTimeout(()=>{ zone.style.borderColor=''; zone.classList.remove('shake'); },400);
+  }
+}
+
+function checkPhase1(){
+  const placed = document.querySelectorAll('.zone .item.placed').length;
+  if(placed === phase1Items.length && !state.phase1Done){
+    state.phase1Done = true;
+    addScore(100,'fase1'); celebrate();
+    updateHUD();
+    const fb = document.getElementById('fb1');
+    fb.classList.remove('hidden');
+    fb.innerHTML = `
+      <strong>✅ Sala reconstruída!</strong><br>
+      Um ambiente escolar organizado, com espaços para colaboração, leitura, criatividade e tecnologia,
+      <strong>aumenta o engajamento</strong> dos estudantes. Quando o aluno encontra um lugar que faz sentido
+      para ele, a participação cresce e o comprometimento floresce. A inovação começa pelo espaço!`;
+    document.getElementById('next1').classList.remove('hidden');
+    document.getElementById('next1').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+}
+function finishPhase1(){ state.phase=2; updateHUD(); renderPhase2(); }
+
+/* ============================================================
+   FASE 2 — TECNOLOGIA CONSCIENTE (timeline)
+============================================================ */
+const phase2Activities = [
+  {id:'t1', emoji:'🔍', label:'Pesquisa digital', cat:'digital'},
+  {id:'t2', emoji:'📖', label:'Leitura e escrita', cat:'leitura'},
+  {id:'t3', emoji:'🛠️', label:'Atividade prática', cat:'pratica'},
+  {id:'t4', emoji:'💬', label:'Discussão em grupo', cat:'grupo'},
+  {id:'t5', emoji:'📱', label:'Uso responsável de dispositivos', cat:'digital'},
+];
+
+function renderPhase2(){
+  clearScreen();
+  const div = document.createElement('div');
+  div.className='screen';
+  div.innerHTML = `
+    <div class="mission-tag">Missão 2 · Tecnologia Consciente</div>
+    <h2>Organize a rotina escolar</h2>
+    <p>Distribua as atividades ao longo do dia de forma <strong>equilibrada</strong>. Não existe resposta única — o importante é alternar pesquisa digital, leitura, prática, discussão e uso consciente dos dispositivos.</p>
+    <div class="panel" style="margin-top:14px">
+      <h3>🎯 Atividades do dia</h3>
+      <div class="pool" id="pool2"></div>
+    </div>
+    <div class="panel" style="margin-top:14px">
+      <h3>🕐 Linha do tempo do dia</h3>
+      <div class="timeline" id="timeline"></div>
+    </div>
+    <div class="feedback hidden" id="fb2" aria-live="polite"></div>
+    <div class="actions">
+      <button class="btn-primary hidden" id="next2" onclick="finishPhase2()">Avançar para Missão 3 →</button>
+    </div>`;
+  screensEl.appendChild(div);
+
+  const pool = div.querySelector('#pool2');
+  const timeline = div.querySelector('#timeline');
+
+  // 5 slots
+  for(let i=0;i<5;i++){
+    const slot = document.createElement('div');
+    slot.className='slot';
+    slot.dataset.index = i;
+    slot.innerHTML = `<div class="slot-num">${i+1}</div><div class="slot-drop"><span class="placeholder">Arraste uma atividade aqui…</span></div>`;
+    timeline.appendChild(slot);
+  }
+
+  phase2Activities.forEach(it=>{
+    const el = document.createElement('div');
+    el.className='item tl';
+    el.draggable=true;
+    el.dataset.cat = it.cat;
+    el.dataset.id = it.id;
+    el.innerHTML = `<span class="emoji">${it.emoji}</span><span>${it.label}</span>`;
+    setupDrag(el);
+    pool.appendChild(el);
+  });
+
+  // slots drops
+  timeline.querySelectorAll('.slot').forEach(slot=>{
+    setupSlotDrop(slot);
+  });
+  setupPoolDrops(pool);
+}
+
+function setupSlotDrop(slot){
+  slot.addEventListener('dragover', e=>{ e.preventDefault(); slot.classList.add('over'); });
+  slot.addEventListener('dragleave', ()=> slot.classList.remove('over'));
+  slot.addEventListener('drop', e=>{
+    e.preventDefault(); slot.classList.remove('over');
+    const id = e.dataTransfer.getData('text/plain');
+    const el = document.querySelector(`.item[data-id="${id}"]`);
+    if(el) placeInSlot(slot, el);
+  });
+}
+function handleSlotDrop(slot, el){ placeInSlot(slot, el); }
+function placeInSlot(slot, el){
+  const drop = slot.querySelector('.slot-drop');
+  drop.querySelector('.placeholder')?.remove();
+  // se já tem item, devolve ao pool
+  const existing = drop.querySelector('.item');
+  if(existing){
+    const pool = document.getElementById('pool2');
+    if(pool) pool.appendChild(existing);
+  }
+  drop.appendChild(el);
+  fixSlots();
+  checkPhase2();
+}
+
+function checkPhase2(){
+  const filled = document.querySelectorAll('#timeline .slot-drop .item').length;
+  if(filled===5 && !state.phase2Done){
+    state.phase2Done = true;
+    addScore(100,'fase2');
+    updateHUD();
+    // análise de equilíbrio
+    const cats = Array.from(document.querySelectorAll('#timeline .slot .item')).map(el=>el.dataset.cat);
+    const uniq = new Set(cats).size;
+    let msg = '';
+    if(uniq>=4){
+      msg = '🌟 <strong>Excelente equilíbrio!</strong> Você alternou diferentes tipos de atividades, o que mantém a atenção, respeita o ritmo dos estudantes e usa a tecnologia de forma consciente.';
+    } else if(uniq===3){
+      msg = '👍 <strong>Bom equilíbrio!</strong> Tente variar ainda mais entre pesquisa digital, leitura, prática, discussão e uso consciente dos dispositivos para um dia mais dinâmico.';
+    } else {
+      msg = '💡 <strong>Dá para equilibrar mais!</strong> Uma rotina rica alterna momentos digitais, leitura, prática e discussão. A tecnologia é ferramenta, não o dia inteiro.';
+    }
+    // destaca o uso de dispositivos
+    const digitalCount = cats.filter(c=>c==='digital').length;
+    msg += `<br><br>📱 Você reservou <strong>${digitalCount}</strong> momento(s) para uso de dispositivos — lembre-se: a tecnologia consciente serve à aprendizagem, não substitui as relações humanas.`;
+    const fb = document.getElementById('fb2');
+    fb.classList.remove('hidden');
+    fb.innerHTML = msg;
+    reveal('next2');
+  }
+}
+function finishPhase2(){ state.phase=3; updateHUD(); renderPhase4(); }
+
+function esc(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+
+/* ============================================================
+   FASE 4 — REDE DE COLABORAÇÃO
+============================================================ */
+const phase4Nodes = [
+  {id:'n1', emoji:'🧒', label:'Alunos'},
+  {id:'n2', emoji:'👩‍🏫', label:'Professores'},
+  {id:'n3', emoji:'👨‍👩‍👧', label:'Família'},
+  {id:'n4', emoji:'💡', label:'Tecnologia'},
+  {id:'n5', emoji:'🏘️', label:'Comunidade'},
+  {id:'n6', emoji:'🏛️', label:'Gestão'},
+];
+let netLinks = [];
+let netSelected = null;
+
+function renderPhase4(){
+  clearScreen();
+  netLinks = []; netSelected = null; state.connections = 0;
+  const div = document.createElement('div');
+  div.className='screen';
+  div.innerHTML = `
+    <div class="mission-tag">Missão 3 · Rede de Colaboração</div>
+    <h2>Conecte quem transforma a escola</h2>
+    <p>Toque em dois participantes para <strong>conectá-los</strong>. Faça pelo menos <strong>3 conexões</strong> para formar a rede que transforma a escola.</p>
+    <div class="net" id="net">
+      <svg class="net-lines" id="netLines"></svg>
+    </div>
+    <div class="conn-count" id="connCount">0 conexões</div>
+    <div class="feedback hidden" id="fb4" aria-live="polite"></div>
+    <div class="actions">
+      <button class="btn-primary hidden" id="next4" onclick="finishPhase4()">Ver resultado final 🏆</button>
+    </div>`;
+  screensEl.appendChild(div);
+
+  const net = div.querySelector('#net');
+  phase4Nodes.forEach(n=>{
+    const el = document.createElement('div');
+    el.className='node';
+    el.dataset.id = n.id;
+    el.innerHTML = `<span class="emoji">${n.emoji}</span><span>${n.label}</span>`;
+    el.tabIndex=0; el.setAttribute('role','button');
+    el.addEventListener('click', ()=>clickNode(el));
+    el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); clickNode(el); } });
+    net.appendChild(el);
+  });
+  setTimeout(drawLinks, 50);
+}
+
+function clickNode(el){
+  if(state.phase!==3) return;
+  if(!netSelected){
+    netSelected = el; el.classList.add('selected'); return;
+  }
+  if(netSelected === el){
+    el.classList.remove('selected'); netSelected = null; return;
+  }
+  const a = netSelected.dataset.id, b = el.dataset.id;
+  const exists = netLinks.some(l=>(l[0]===a&&l[1]===b)||(l[0]===b&&l[1]===a));
+  if(!exists){
+    netLinks.push([a,b]);
+    netSelected.classList.add('connected'); el.classList.add('connected');
+  }
+  netSelected.classList.remove('selected'); netSelected = null;
+  state.connections = netLinks.length;
+  document.getElementById('connCount').textContent = state.connections + (state.connections===1?' conexão':' conexões');
+  if(state.connections>=3 && !state.phase4Idea) completePhase4();
+  drawLinks();
+}
+
+function drawLinks(){
+  const net = document.getElementById('net'), svg = document.getElementById('netLines');
+  if(!net || !svg) return;
+  const nr = net.getBoundingClientRect();
+  const center = id=>{
+    const e = net.querySelector(`.node[data-id="${id}"]`);
+    if(!e) return null;
+    const r = e.getBoundingClientRect();
+    return {x:r.left-nr.left+r.width/2, y:r.top-nr.top+r.height/2};
+  };
+  svg.setAttribute('viewBox', `0 0 ${nr.width} ${nr.height}`);
+  svg.innerHTML = netLinks.map(([a,b])=>{
+    const p=center(a), q=center(b);
+    return p&&q ? `<line x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" opacity=".7"/>` : '';
+  }).join('');
+}
+
+function completePhase4(){
+  state.phase4Idea = true;
+  addScore(100,'fase4');
+  updateHUD();
+  const fb = document.getElementById('fb4');
+  fb.classList.remove('hidden');
+  fb.innerHTML = '🤝 <strong>Rede formada!</strong> A transformação da escola nasce da colaboração entre todos que fazem parte dela.';
+  reveal('next4');
+}
+function finishPhase4(){ state.phase=4; updateHUD(); renderFinal(); }
+
+/* ============================================================
+   TELA FINAL
+============================================================ */
+function nodeLabel(id){ const n = phase4Nodes.find(x=>x.id===id); return n ? n.emoji+' '+n.label : ''; }
+
+function renderFinal(){
+  clearScreen();
+  progressBar.style.width = '100%'; setTimeout(()=>celebrate(40),300);
+  const div = document.createElement('div');
+  div.className='screen';
+  div.innerHTML = `
+    <div class="final-hero">
+      <div class="big">🏆</div>
+      <h1>Parabéns, agente de transformação!</h1>
+      <p>Você concluiu todas as missões da Escola do Futuro.</p>
+    </div>
+    <div class="results">
+      <div class="result-card"><div class="num">${state.score}</div><div class="lbl">Pontos</div></div>
+      <div class="result-card"><div class="num">3/3</div><div class="lbl">Missões</div></div>
+      <div class="result-card"><div class="num">${state.connections}</div><div class="lbl">Conexões</div></div>
+    </div>
+    <h3>🔗 Suas conexões</h3>
+    <div class="ideas-list">${netLinks.map(([a,b])=>`<div class="idea">${nodeLabel(a)} ↔ ${nodeLabel(b)}</div>`).join('')}</div>
+    <div class="final-quote">“A escola do futuro se constrói hoje, com pessoas que escutam, colaboram e ousam transformar.”</div>
+    <div class="actions"><button class="btn-primary" onclick="restartGame()">↻ Jogar novamente</button></div>`;
+  screensEl.appendChild(div);
+}
+
+function restartGame(){
+  Object.assign(state,{score:0,phase:0,phase1Done:false,phase2Done:false,phase4Idea:'',connections:0});
+  netLinks = []; netSelected = null;
+  updateHUD();
+  renderStart();
+}
+
+window.addEventListener('resize', ()=>drawLinks());
+renderStart();
+</script>
+</body>
+</html>
